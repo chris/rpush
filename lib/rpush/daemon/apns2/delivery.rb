@@ -12,9 +12,11 @@ module Rpush
           @app = app
           @client = http2_client
           @batch = batch
+          log_info("[Rpush Sent Debug] Apns2 daemon got batch with: #{batch.notifications.inspect}")
         end
 
         def perform
+          log_info("[Rpush Sent Debug] about to do Apns2.perform")
           @batch.each_notification do |notification|
             prepare_async_post(notification)
           end
@@ -23,6 +25,7 @@ module Rpush
           @client.join
 
           @batch.mark_all_delivered
+          log_info("[Rpush Sent Debug] did Apns2.perform")
         rescue SocketError => error
           mark_batch_retryable(Time.now + 10.seconds, error)
           raise
@@ -30,7 +33,9 @@ module Rpush
           mark_batch_failed(error)
           raise
         ensure
+          log_info("[Rpush Sent Debug] about to do @batch.all_processed")
           @batch.all_processed
+          log_info("[Rpush Sent Debug] did @batch.all_processed")
         end
 
         protected

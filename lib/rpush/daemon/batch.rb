@@ -1,6 +1,7 @@
 module Rpush
   module Daemon
     class Batch
+      include Loggable
       include Reflectable
 
       attr_reader :num_processed, :notifications, :delivered, :failed, :retryable
@@ -79,16 +80,20 @@ module Rpush
       end
 
       def notification_processed
+        log_info("[Rpush Sent Debug] in Batch.notification_processed")
         @mutex.synchronize do
           @num_processed += 1
+          log_info("[Rpush Sent Debug] num_processed: #{@num_processed} vs. notification size: #{@notifications.size}")
           complete if @num_processed >= @notifications.size
         end
       end
 
       def all_processed
+        log_info("[Rpush Sent Debug] in Batch.all_processed")
         @mutex.synchronize do
           @num_processed = @notifications.size
           complete
+          log_info("[Rpush Sent Debug] in Batch.all_processed called complete")
         end
       end
 
@@ -110,8 +115,10 @@ module Rpush
       end
 
       def complete_delivered
+        log_info("[Rpush Sent Debug] about to do Batch.complete_delivered")
         Rpush::Daemon.store.mark_batch_delivered(@delivered)
         @delivered.each do |notification|
+          log_info("[Rpush Sent Debug] doing Batch.complete_delivered for notification: #{notification.inspect}")
           reflect(:notification_delivered, notification)
         end
       end
