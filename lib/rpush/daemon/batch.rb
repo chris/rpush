@@ -52,8 +52,10 @@ module Rpush
       end
 
       def mark_all_delivered
+        log_info("[Rpush Sent Debug] doing Batch.mark_all_delivered")
         @mutex.synchronize do
           @delivered = @notifications
+          log_info("[Rpush Sent Debug] set @delivered to: #{@delivered.inspect}")
         end
         each_notification do |notification|
           Rpush::Daemon.store.mark_delivered(notification, Time.now, persist: false)
@@ -115,7 +117,7 @@ module Rpush
       end
 
       def complete_delivered
-        log_info("[Rpush Sent Debug] about to do Batch.complete_delivered")
+        log_info("[Rpush Sent Debug] about to do Batch.complete_delivered, with @delivered: #{@delivered.inspect}")
         Rpush::Daemon.store.mark_batch_delivered(@delivered)
         @delivered.each do |notification|
           log_info("[Rpush Sent Debug] doing Batch.complete_delivered for notification: #{notification.inspect}")
