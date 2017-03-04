@@ -24,6 +24,7 @@ module Rpush
           # Send all preprocessed requests at once
           @client.join
 
+          log_info("[Rpush Sent Debug] about to do @batch.mark_all_delivered in Apns2::Delivery")
           @batch.mark_all_delivered
           log_info("[Rpush Sent Debug] did Apns2.perform")
         rescue SocketError => error
